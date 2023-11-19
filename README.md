@@ -1,4 +1,5 @@
-#B4P_Embedded
+#SEN_Embedded
+
 This is try to search for most efficient LLM to match the enquiry with most suitable docs given the worksheet of attributes of worksheet
 
 In the github environment, click on "code" "codespaces" environment
