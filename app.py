@@ -18,8 +18,8 @@ from langchain.vectorstores import FAISS
 
 #By using st.set_page_config(), you can customize the appearance of your Streamlit application's web page
 
-st.set_page_config(page_title="Corporate Search", page_icon=":robot:")
-st.header("Good Morning... Sir/Madam, if you like have some samples of compliance filings, I may be able to help")
+st.set_page_config(page_title="Advice Seeking", page_icon=":robot:")
+st.header("Good Morning... Sir/Madam, it is difficult to raise a child with speciality, I wish I can help")
 
 #The below snippet helps us to import Unstructured and structured CSV file data for our tasks
 #from langchain.document_loaders.csv_loader import UnstructuredCSVLoader
@@ -39,11 +39,11 @@ db = FAISS.from_documents(data, embeddings)
 
 #Function to receive input from user and store it in a variable
 def get_text():
-    input_text = st.text_input("You: ", key= input)
+    input_text = st.text_input("Parent: ", key= input)
     return input_text
 
 user_input=get_text()
-submit = st.button('Find similar filings')  
+submit = st.button('Find some relevant advices')  
 
 if submit:
     
