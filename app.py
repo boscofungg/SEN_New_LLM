@@ -102,18 +102,6 @@ def get_answer(query):
   response = chain.run(input_documents=relevant_docs, question=query)
   return response
 
-user_input=get_text()
-submit = st.button('Find some relevant advices')  
-
-if submit:
-    response = get_answer(user_input)
-    st.subheader("Top Match Answer:")
-    st.write(response,key= 1)
-    
-    #If the button is clicked, the below snippet will fetch us the similar text
-    st.text(docs[0].page_content)
-    st.text(docs[1].page_content)
-    
 # From here down is all the StreamLit UI.
 st.set_page_config(page_title="We understand your difficulties, we like to help", page_icon=":robot:")
 st.header("Greeting, no matter day or night, we are here to provide the advices")
@@ -124,7 +112,17 @@ if "sessionMessages" not in st.session_state:
     ]
      user_input=get_text()
      print(user_input)
-submit = st.button('Generate')  
+
+submit = st.button('Find some relevant advices')  
+
+if submit:
+    response = get_answer(user_input)
+    st.subheader("Top Match Answer:")
+    st.write(response,key= 2)
+    st.text(response[0].page_content)
+    st.text(response[1].page_content)
+    
+  
 
 
 
