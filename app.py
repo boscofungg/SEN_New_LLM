@@ -1,58 +1,130 @@
-#Allows you to use Streamlit, a framework for building interactive web applications.
+#Streamlit, a framework for building interactive web applications.
 #It provides functions for creating UIs, displaying data, and handling user inputs.
 import streamlit as st
+from langchain import HuggingFaceHub
 
 #This module provides a way to interact with the operating system, such as accessing environment variables, working with files
 #and directories, executing shell commands, etc
 import os
+os.environ["HUGGINGFACEHUB_API_TOKEN"] = ""
 
-#Helps us generate embeddings
-#An embedding is a vector (list) of floating point numbers. The distance between two vectors measures their relatedness. 
-#Small distances suggest high relatedness and large distances suggest low relatedness.
+# An embedding is a vector (list) of floating point numbers. The distance between two vectors measures their relatedness. 
+# Small distances suggest high relatedness and large distances suggest low relatedness.
+# Generate Text Embedding using different LLM
+from langchain.llms import OpenAI
 from langchain.embeddings import OpenAIEmbeddings
+#from langchain.embeddings.openai import OpenAIEmbeddings
 
-
-#FAISS is an open-source library developed by Facebook AI Research for efficient similarity search and clustering of large-scale datasets, particularly with high-dimensional vectors. 
+#FAISS is an open-source library developed by Facebook AI Research for efficient similarity search and 
+#clustering of large-scale datasets, particularly with high-dimensional vectors. 
 #It provides optimized indexing structures and algorithms for tasks like nearest neighbor search and recommendation systems.
 from langchain.vectorstores import FAISS
 
-#By using st.set_page_config(), you can customize the appearance of your Streamlit application's web page
-
+#By st.set_page_config(), you can customize the appearance of your Streamlit application's web page
 st.set_page_config(page_title="Advice Seeking", page_icon=":robot:")
 st.header("Good Morning... Sir/Madam, it is difficult to raise a child with speciality, I wish I can help")
 
-#The below snippet helps us to import Unstructured and structured CSV file data for our tasks
-#from langchain.document_loaders.csv_loader import UnstructuredCSVLoader
-from langchain.document_loaders.csv_loader import CSVLoader
-loader = CSVLoader(file_path='myData.csv')
+#The below snippet helps us to import structured pdf file data for our tasks
+from langchain.document_loaders import PyPDFDirectoryLoader
 
-#Assigning the data inside the csv to our variable here
-data = loader.load()
+def load_docs(directory):
+    for filename in os.listdir(directory):
+        # Loads PDF files available in a directory with pypdf
+        if filename.endswith('.pdf'):
+            return load_docspdf(directory)
+        # Passing the directory to the 'load_docs' function
+        elif filename.endswith('.xlsx'):
+            return load_docsexcel(directory)
+        else:
+            print(f"Unsupported file format: {filename}")
 
-#Display the data
-#print(data)
+def load_docspdf(directory):
+    for filename in os.listdir(directory):
+        if filename.endswith('.pdf'):
+            loader = PyPDFDirectoryLoader(directory)
+            documents = loader.load()
+    return documents
 
-#Initialize the OpenAIEmbeddings object
+#Assigning the data inside the pdf to our variable here
+# Passing the directory to the 'load_docs' function
+directory = '/data'
+documents = load_docs(directory)
+
+len(documents)
+
+#This function will split the documents into chunks
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+def split_docs(documents, chunk_size=3000, chunk_overlap=20):
+  text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+  docs = text_splitter.split_documents(documents)
+  return docs
+
+docs = split_docs(documents)
+
+# Initialize the OpenAIEmbeddings object
+# Using OpenAI specified models
+#embeddings = OpenAIEmbeddings(model_name="text-embedding-ada-002")  
+# OR Using Hugging Face LLM for creating Embeddings for documents/Text
+#from langchain.embeddings import HuggingFaceEmbeddings, SentenceTransformerEmbeddings
+#embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+
 embeddings = OpenAIEmbeddings()
 
-db = FAISS.from_documents(data, embeddings)
+#Store and Index vector space
+db = FAISS.from_documents(docs, embeddings)
 
-#Function to receive input from user and store it in a variable
+# LLM Q&A Code
+from langchain.llms import OpenAI
+from langchain.chains.question_answering import load_qa_chain
+from langchain.schema import (
+    AIMessage,
+    HumanMessage,
+    SystemMessage
+)
+llm = OpenAI()
+chain = load_qa_chain(llm, chain_type="stuff")
+
+# This function will transform the question that we raise into input text to search relevant docs
 def get_text():
-    input_text = st.text_input("Parent: ", key= input)
+    input_text = st.text_input("Parent: ", key = input)
     return input_text
+
+#This function will help us in fetching the top k relevent documents from our vector store - Pinecone
+def get_similiar_docs(query, k=2):
+    similar_docs = db.similarity_search(query, k=k)
+    return similar_docs
+
+# This function will help us get the answer from the relevant docs matching input text
+def get_answer(query):
+  relevant_docs = get_similiar_docs(query)
+  print(relevant_docs)
+  response = chain.run(input_documents=relevant_docs, question=query)
+  return response
 
 user_input=get_text()
 submit = st.button('Find some relevant advices')  
 
 if submit:
+    response = get_answer(user_input)
+    st.subheader("Top Match Answer:")
+    st.write(response,key= 1)
     
     #If the button is clicked, the below snippet will fetch us the similar text
-    docs = db.similarity_search(user_input)
-    print(docs)
-    st.subheader("Top Matches:")
     st.text(docs[0].page_content)
     st.text(docs[1].page_content)
     
+# From here down is all the StreamLit UI.
+st.set_page_config(page_title="We understand your difficulties, we like to help", page_icon=":robot:")
+st.header("Greeting, no matter day or night, we are here to provide the advices")
+
+if "sessionMessages" not in st.session_state:
+     st.session_state.sessionMessages = [
+        SystemMessage(content=" It is wished we are helpful assistants.")
+    ]
+     user_input=get_text()
+     print(user_input)
+submit = st.button('Generate')  
+
 
 
