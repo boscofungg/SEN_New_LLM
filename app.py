@@ -103,10 +103,6 @@ def get_answer(query):
   response = chain.run(input_documents=relevant_docs, question=query)
   return response
 
-# From here down is all the StreamLit UI.
-st.set_page_config(page_title="We understand your difficulties, we like to help", page_icon=":robot:")
-st.header("Greeting, no matter day or night, we are here to provide the advices")
-
 if "sessionMessages" not in st.session_state:
      st.session_state.sessionMessages = [
         SystemMessage(content=" It is wished we are helpful assistants.")
