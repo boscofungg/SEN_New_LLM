@@ -109,17 +109,9 @@ if "sessionMessages" not in st.session_state:
     ]
      user_input=get_text()
      print(user_input)
-
-submit = st.button('Find some relevant advices')  
+submit = st.button('Generate')  
 
 if submit:
     response = get_answer(user_input)
-    st.subheader("Top Match Answer:")
-    st.write(response,key= 2)
-    st.text(response[0].page_content)
-    st.text(response[1].page_content)
-    
-  
-
-
-
+    st.subheader("Answer:")
+    st.write(response,key= 1)
