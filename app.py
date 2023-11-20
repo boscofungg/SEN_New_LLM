@@ -108,7 +108,7 @@ if "sessionMessages" not in st.session_state:
         SystemMessage(content=" It is wished we are helpful assistants.")
     ]
      input_text = get_text()
-     print(user_input)
+     print(input_text)
 submit = st.button('Generate')  
 
 if submit:
