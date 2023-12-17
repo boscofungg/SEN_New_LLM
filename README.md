@@ -26,6 +26,6 @@ At terminal > echo "export OPENAI_API_KEY='yourkey'" >> ~/.zsh
 
 source ~/.zsh
 
-ech $OPENAI_API_KEY
+echo $OPENAI_API_KEY
 
 After install the package environment, type > python3 -m streamlit run app.py
