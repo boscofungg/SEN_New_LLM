@@ -47,7 +47,7 @@ def load_docspdf(directory):
 
 #Assigning the data inside the pdf to our variable here
 # Passing the directory to the 'load_docs' function
-directory = '/workspaces/SEN_embedded/data'
+directory = '/workspaces/SEN_New_LLM/data'
 documents = load_docs(directory)
 
 len(documents)
@@ -84,8 +84,8 @@ question = "What is ADHD?"
 template = """Question: {question}
 Answer: Let's think step by step."""
 prompt = PromptTemplate(template=template, input_variables=["question"])
-llm = OpenAI()
-chain = load_qa_chain(llm, chain_type="stuff")
+# llm = OpenAI()
+# chain = load_qa_chain(llm, chain_type="stuff")
 repo_id = "google/flan-t5-xxl"  # See https://huggingface.co/models?pipeline_tag=text-generation&sort=downloads for some other options
 llm = HuggingFaceHub(
     repo_id=repo_id, model_kwargs={"temperature": 0.5, "max_length": 64}
@@ -107,13 +107,13 @@ def get_similiar_docs(query, k=2):
 def get_answer(query):
   relevant_docs = get_similiar_docs(query)
   print(relevant_docs)
-  response = chain.run(input_documents=relevant_docs, question=query)
+  response = llm_chain.run(input_documents=relevant_docs, question=query)
   return response
 
-if "sessionMessages" not in st.session_state:
-     st.session_state.sessionMessages = [
-        SystemMessage(content=" It is wished we are helpful assistants.")
-    ]
+# if "sessionMessages" not in st.session_state:
+#      st.session_state.sessionMessages = [
+#         SystemMessage(content=" It is wished we are helpful assistants.")
+#     ]
 input_text = get_text()
 submit = st.button('Generate')  
 
