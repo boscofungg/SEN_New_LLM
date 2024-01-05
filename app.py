@@ -69,8 +69,10 @@ docs = split_docs(documents)
 #from langchain.embeddings import HuggingFaceEmbeddings, SentenceTransformerEmbeddings
 #embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
 
-from langchain_community.embeddings import HuggingFaceEmbeddings
-embeddings = HuggingFaceEmbeddings()
+from langchain_community.embeddings import DashScopeEmbeddings
+embeddings = DashScopeEmbeddings(
+    model="text-embedding-v1", dashscope_api_key="your-dashscope-api-key"
+)
 
 #Store and Index vector space
 db = FAISS.from_documents(docs, embeddings)
@@ -117,7 +119,31 @@ def get_answer(query):
 input_text = get_text()
 submit = st.button('Generate')  
 
+import time
+
 if submit:
-    response = get_answer(input_text)
-    st.subheader("Answer:")
-    st.write(response,key= 1)
+    result = 0
+    queries = ["What is ADHD?","What are the symptoms of ADHD?", "How is ADHD diagnosed?","What causes ADHD?", "How is ADHD treated?"]
+    for query in queries:
+        query_start = time.time()
+        response = get_answer(query)
+        query_end = time.time()
+        duration = query_end-query_start
+        result += duration
+    print("_____")
+    print(result)
+    print("_____")
+    st.subheader("Time taken by DashScopeEmbeddings:")
+    st.write(result,key= 1)
+# if __name__ == '__main__':
+#     result = f"Vector Store Time: {vectorStoreTime}\n\n\n"
+#     queries = ["What is ADHD?","What are the symptoms of ADHD?", "How is ADHD diagnosed?","What causes ADHD?", "How is ADHD treated?"]
+#     for query in queries:
+#         query_start = time.time()
+#         response = get_answer(query)
+#         query_end = time.time()
+#         duration = query_end-query_start
+#         result += f"Q:{query}\n\nAns:{response}\n\nTime:{duration}\n\n\n"
+#     print("_____")
+#     print(result)
+#     print("_____")
