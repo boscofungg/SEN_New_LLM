@@ -7,3 +7,7 @@ tiktoken
 python-dotenv
 faiss-cpu
 pypdf
+tensorflow
+tensorflow-hub
+tensorflow_text
+fastembed
